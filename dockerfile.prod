@@ -12,21 +12,24 @@ RUN npm install
 #Builder - construye la app
 FROM node:21-alpine3.19 as build
 WORKDIR /usr/src/app
-ARG AUTH_DB_URL
-ENV DATABASE_URL=$AUTH_DB_URL
+# ARG AUTH_DB_URL
+# ENV DATABASE_URL=$AUTH_DB_URL
 #Copia de deps los modulos de node
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 
 
 #Copia todo el codigo fuente de la app
 COPY . .
-RUN npx prisma migrate deploy
-RUN npx prisma generate
-
-#RUN npm run test
 RUN npm run build
 
 RUN npm ci -f --only-production && npm cache clean --force
+
+# RUN npx prisma migrate deploy
+RUN npx prisma generate
+
+#RUN npm run test
+
+
 
 #Crear imagen final
 
@@ -36,7 +39,7 @@ WORKDIR /usr/src/app
 COPY --from=build /usr/src/app/node_modules ./node_modules
 ##Copiar codigo o dist
 COPY --from=build /usr/src/app/dist ./dist
-COPY --from=build /usr/src/app/prisma ./prisma
+# COPY --from=build /usr/src/app/prisma ./prisma
 
 ENV NODE_ENV=production
 
